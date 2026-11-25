@@ -23,7 +23,7 @@ class Settings(BaseSettings):
     storage_dir: str = "./data/uploads"
 
     # Preprocessing & Local PII Anonymization (Rule 4)
-    pdf_render_dpi: int = Field(default=300, ge=72, le=600)
+    pdf_render_dpi: int = Field(default=200, ge=72, le=600)
     skip_cover_page: bool = True
     auto_split_spreads: bool = True
     header_mask_pct: float = Field(default=0.0, ge=0.0, le=0.4)

@@ -29,7 +29,7 @@ def _encode_image_file(path: str | Path) -> tuple[str, int, int]:
         rgb = img.convert("RGB")
         w, h = rgb.size
         buf = io.BytesIO()
-        rgb.save(buf, format="PNG")
+        rgb.save(buf, format="JPEG", quality=90, optimize=True)
     return base64.b64encode(buf.getvalue()).decode("ascii"), w, h
 
 

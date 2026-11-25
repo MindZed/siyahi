@@ -107,7 +107,7 @@ def _pil_to_base64_png(pil_img: Any) -> str:
     return base64.b64encode(buf.getvalue()).decode("ascii")
 
 
-def _resize_for_vlm(pil_img: Any, max_long_edge: int = 1920) -> Any:
+def _resize_for_vlm(pil_img: Any, max_long_edge: int = 1280) -> Any:
     w, h = pil_img.size
     long_edge = max(w, h)
     if long_edge <= max_long_edge:
@@ -118,7 +118,7 @@ def _resize_for_vlm(pil_img: Any, max_long_edge: int = 1920) -> Any:
 
 @app.cls(
     image=image,
-    gpu="L4",
+    gpu="L40S",
     min_containers=0,
     max_containers=1,
     scaledown_window=90,
@@ -141,10 +141,13 @@ class OCRService:
         # Run vLLM engine in-process cleanly for Modal serverless containers
         os.environ["VLLM_ENABLE_V1_MULTIPROCESSING"] = "0"
 
-        print("[OCRService] Loading PP-DocLayoutV3 on CPU...")
+        self.layout_device = "cuda" if torch.cuda.is_available() else "cpu"
+        print(f"[OCRService] Loading PP-DocLayoutV3 on {self.layout_device}...")
         layout_id = "PaddlePaddle/PP-DocLayoutV3_safetensors"
         self.layout_processor = AutoImageProcessor.from_pretrained(layout_id)
-        self.layout_model = AutoModelForObjectDetection.from_pretrained(layout_id)
+        self.layout_model = AutoModelForObjectDetection.from_pretrained(layout_id).to(
+            self.layout_device
+        )
         self.layout_model.eval()
 
         vlm_id = os.environ.get("VLM_MODEL_ID", "Qwen/Qwen3.5-9B")
@@ -169,7 +172,7 @@ class OCRService:
                 "enforce_eager": False,
                 "limit_mm_per_prompt": {"image": 1, "video": 0},
                 "skip_mm_profiling": True,
-                "mm_processor_kwargs": {"min_pixels": 200704, "max_pixels": 2007040},
+                "mm_processor_kwargs": {"min_pixels": 200704, "max_pixels": 1003520},
                 "max_num_seqs": 2,
             }
             if quantization and quantization.lower() != "none":
@@ -311,6 +314,7 @@ class OCRService:
         import torch
 
         inputs = self.layout_processor(images=pil_img, return_tensors="pt")
+        inputs = {k: v.to(self.layout_device) for k, v in inputs.items() if isinstance(v, torch.Tensor)}
         with torch.no_grad():
             outputs = self.layout_model(**inputs)
 
@@ -369,14 +373,19 @@ class OCRService:
         )
 
         w, h = pil_img.size
+        t0 = time.perf_counter()
         detections = [] if mode == "whole_page" else self._detect_layout_regions(pil_img)
+        t_layout = time.perf_counter() - t0
 
         regions: list[dict[str, Any]] = []
         full_markdown_parts: list[str] = []
 
         if mode in {"hybrid", "whole_page"} or not detections:
             # Whole-page pass preserves multi-column context, curly braces, and Pen-to-Print flow
-            page_raw = self._run_vlm(pil_img, PAGE_TRANSCRIPTION_USER_PROMPT, temperature=0.0, max_tokens=2800)
+            t1 = time.perf_counter()
+            page_raw = self._run_vlm(pil_img, PAGE_TRANSCRIPTION_USER_PROMPT, temperature=0.0, max_tokens=2048)
+            t_vlm = time.perf_counter() - t1
+            print(f"[OCRService] page={page_num} layout={t_layout:.2f}s vlm={t_vlm:.2f}s chars={len(page_raw)}")
             page_clean, page_struck, page_unclear = _strip_struck_and_extract_tags(page_raw)
 
             if not detections:
