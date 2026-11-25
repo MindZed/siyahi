@@ -76,7 +76,7 @@ image = (
         "qwen-vl-utils",
         "hf-transfer",
     )
-    .env({"HF_HUB_ENABLE_HF_TRANSFER": "1"})
+    .env({"HF_HUB_ENABLE_HF_TRANSFER": "1", "VLLM_ENABLE_V1_MULTIPROCESSING": "0"})
     .add_local_python_source("modal_worker")
 )
 
@@ -126,11 +126,13 @@ def _resize_for_vlm(pil_img: Any, max_long_edge: int = 1920) -> Any:
     startup_timeout=300,
     volumes={"/root/.cache/huggingface": volume},
     secrets=[modal.Secret.from_name(SECRET_NAME)],
+    enable_memory_snapshot=True,
+    experimental_options={"enable_gpu_snapshot": True},
 )
 class OCRService:
     """Two-stage layout + VLM handwriting OCR service."""
 
-    @modal.enter()
+    @modal.enter(snap=True)
     def load_models(self) -> None:
         import torch
         from PIL import Image
@@ -164,7 +166,7 @@ class OCRService:
                 "max_model_len": 8192,
                 "gpu_memory_utilization": 0.88,
                 "enable_prefix_caching": True,
-                "enforce_eager": True,
+                "enforce_eager": False,
                 "limit_mm_per_prompt": {"image": 1, "video": 0},
                 "skip_mm_profiling": True,
                 "mm_processor_kwargs": {"min_pixels": 200704, "max_pixels": 2007040},
@@ -215,8 +217,6 @@ class OCRService:
             )
             self.hf_model.eval()
             self._run_vlm(dummy, "Read text.", temperature=0.0, max_tokens=8)
-
-        volume.commit()
 
     def _run_vlm(
         self,
