@@ -4,11 +4,34 @@
 
 :root {
   color-scheme: light;
+  --color-primary: #1e293b;
+  --color-accent: #2563eb;
+  --color-background: #f8fafc;
+  --color-foreground: #0f172a;
+  --color-muted-foreground: #475569;
+  --color-border: #e4e5e7;
+}
+
+html {
+  -webkit-tap-highlight-color: transparent;
 }
 
 body {
-  background-color: #f8fafc;
-  color: #0f172a;
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
+}
+
+/* Respect reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 /* Custom clean scrollbars for 3-pane review desk */

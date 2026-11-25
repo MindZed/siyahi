@@ -126,7 +126,7 @@ export function TranscriptEditor({
         return (
           <span
             key={idx}
-            className="mx-0.5 inline-flex items-center gap-1 rounded border border-amber-300 bg-amber-50 px-1.5 py-0.5 text-xs font-semibold text-amber-900"
+            className="mx-0.5 inline-flex flex-wrap items-center gap-1 rounded border border-amber-300 bg-amber-50 px-1.5 py-0.5 text-xs font-semibold text-amber-900"
           >
             <span>?</span>
             {alts.map((alt, ai) => (
@@ -134,7 +134,7 @@ export function TranscriptEditor({
                 key={ai}
                 type="button"
                 onClick={() => handleResolveUnclear(part, alt)}
-                className="rounded bg-white px-1 py-0.5 text-[11px] hover:bg-amber-200"
+                className="min-h-[28px] rounded bg-white px-2 py-0.5 text-[11px] hover:bg-amber-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
                 title={`Click to pick "${alt}"`}
               >
                 {alt}
@@ -148,7 +148,7 @@ export function TranscriptEditor({
         return (
           <span
             key={idx}
-            className="my-2 block rounded-lg border border-red-200 bg-red-50/50 p-2 text-xs text-red-900"
+            className="my-2 block rounded-lg border border-red-200 bg-red-50/50 p-2.5 text-xs text-red-900"
           >
             <strong>Diagram Detected:</strong> {desc}
           </span>
@@ -162,94 +162,94 @@ export function TranscriptEditor({
     <div className="flex h-full flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
       {/* Header & Exports */}
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 bg-slate-50 px-3 py-2">
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1.5">
           <button
             type="button"
             onClick={() => setViewMode("forensic")}
-            className={`inline-flex items-center gap-1 rounded px-2 py-1 text-xs font-semibold ${
+            className={`inline-flex min-h-[44px] items-center gap-1.5 rounded-lg px-2.5 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 sm:min-h-[36px] ${
               viewMode === "forensic"
-                ? "bg-slate-900 text-white"
-                : "text-slate-600 hover:bg-slate-200"
+                ? "bg-[#1E293B] text-white"
+                : "text-[#475569] hover:bg-slate-200"
             }`}
           >
-            <Eye className="h-3.5 w-3.5" />
-            Forensic Tags
+            <Eye className="h-3.5 w-3.5" aria-hidden="true" />
+            <span>Forensic</span>
           </button>
           <button
             type="button"
             onClick={() => setViewMode("clean")}
-            className={`inline-flex items-center gap-1 rounded px-2 py-1 text-xs font-semibold ${
+            className={`inline-flex min-h-[44px] items-center gap-1.5 rounded-lg px-2.5 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 sm:min-h-[36px] ${
               viewMode === "clean"
-                ? "bg-slate-900 text-white"
-                : "text-slate-600 hover:bg-slate-200"
+                ? "bg-[#1E293B] text-white"
+                : "text-[#475569] hover:bg-slate-200"
             }`}
           >
-            Clean .MD
+            <span>Clean .MD</span>
           </button>
           <button
             type="button"
             onClick={() => setViewMode("edit")}
-            className={`inline-flex items-center gap-1 rounded px-2 py-1 text-xs font-semibold ${
+            className={`inline-flex min-h-[44px] items-center gap-1.5 rounded-lg px-2.5 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 sm:min-h-[36px] ${
               viewMode === "edit"
-                ? "bg-slate-900 text-white"
-                : "text-slate-600 hover:bg-slate-200"
+                ? "bg-[#1E293B] text-white"
+                : "text-[#475569] hover:bg-slate-200"
             }`}
           >
-            <Edit3 className="h-3.5 w-3.5" />
-            Edit
+            <Edit3 className="h-3.5 w-3.5" aria-hidden="true" />
+            <span>Edit</span>
           </button>
         </div>
 
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-2">
           <a
             href={api.exportMdUrl(submissionId, "clean")}
-            className="inline-flex items-center gap-1 rounded border border-slate-300 bg-white px-2 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-100"
+            className="inline-flex min-h-[44px] items-center gap-1 rounded-lg border border-slate-300 bg-white px-2.5 text-xs font-semibold text-[#1E293B] hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 sm:min-h-[36px]"
           >
-            <Download className="h-3.5 w-3.5" />
-            .MD
+            <Download className="h-3.5 w-3.5" aria-hidden="true" />
+            <span>.MD</span>
           </a>
           <a
             href={api.exportPdfUrl(submissionId)}
-            className="inline-flex items-center gap-1 rounded bg-blue-600 px-2.5 py-1 text-xs font-semibold text-white hover:bg-blue-700"
+            className="inline-flex min-h-[44px] items-center gap-1 rounded-lg bg-[#2563EB] px-3 text-xs font-semibold text-white hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 sm:min-h-[36px]"
           >
-            <FileDown className="h-3.5 w-3.5" />
-            .PDF
+            <FileDown className="h-3.5 w-3.5" aria-hidden="true" />
+            <span>.PDF</span>
           </a>
         </div>
       </div>
 
       {feedback && (
-        <div className="border-b border-blue-200 bg-blue-50 px-3 py-1.5 text-xs text-blue-900">
+        <div className="border-b border-blue-200 bg-blue-50 px-3 py-2 text-xs text-blue-900">
           {feedback}
         </div>
       )}
 
       {/* Body */}
-      <div className="flex-1 overflow-auto p-4">
+      <div className="flex-1 overflow-auto p-3.5 sm:p-4">
         {viewMode === "forensic" && (
           <div className="space-y-4">
             {activeQuestionNo && (
-              <div className="rounded bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700">
+              <div className="rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-semibold text-[#334155]">
                 Showing Transcript for {activeQuestionNo}
               </div>
             )}
-            <div className="whitespace-pre-wrap font-sans text-sm leading-relaxed text-slate-800">
+            <div className="whitespace-pre-wrap font-sans text-sm leading-relaxed text-[#0F172A]">
               {rawForensicSource ? (
                 renderForensicTokens(rawForensicSource)
               ) : (
-                <span className="text-slate-400">OCR transcript pending...</span>
+                <span className="text-[#475569]">OCR transcript pending...</span>
               )}
             </div>
 
             {Object.keys(diagramCropMap).length > 0 && (
               <div className="space-y-2 border-t border-slate-200 pt-3">
-                <div className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                <div className="text-xs font-bold uppercase tracking-wider text-[#475569]">
                   Extracted Diagram Crops
                 </div>
                 <div className="grid grid-cols-1 gap-2">
                   {Object.entries(diagramCropMap).map(([rid, url]) => (
-                    <div key={rid} className="rounded-lg border border-slate-200 p-2">
-                      <div className="mb-1 font-mono text-[11px] text-slate-500">{rid}</div>
+                    <div key={rid} className="rounded-lg border border-slate-200 p-2.5">
+                      <div className="mb-1 font-mono text-[11px] text-[#475569]">{rid}</div>
                       <img
                         src={apiUrl(url)}
                         alt={`Diagram crop ${rid}`}
@@ -264,7 +264,7 @@ export function TranscriptEditor({
         )}
 
         {viewMode === "clean" && (
-          <pre className="whitespace-pre-wrap font-mono text-xs leading-relaxed text-slate-800">
+          <pre className="whitespace-pre-wrap font-mono text-xs leading-relaxed text-[#0F172A]">
             {cleanMarkdown || "No clean Markdown generated yet."}
           </pre>
         )}
@@ -273,42 +273,42 @@ export function TranscriptEditor({
           <div className="flex h-full flex-col gap-3">
             {hasEvaluation && activeQuestionNo ? (
               <>
-                <label className="text-xs font-semibold text-slate-700">
+                <label className="text-xs font-semibold text-[#334155]">
                   Editing Transcript for {activeQuestionNo}
                 </label>
                 <textarea
                   value={draftQuestionText}
                   onChange={(e) => setDraftQuestionText(e.target.value)}
-                  className="min-h-[260px] flex-1 rounded-lg border border-slate-300 p-3 font-mono text-xs leading-relaxed text-slate-900 focus:border-blue-500 focus:outline-none"
+                  className="min-h-[240px] flex-1 rounded-lg border border-slate-300 p-3 font-mono text-xs leading-relaxed text-[#0F172A] focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/20"
                 />
                 <button
                   type="button"
                   disabled={saving}
                   onClick={handleRegrade}
-                  className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-slate-900 px-3 py-2 text-xs font-semibold text-white hover:bg-slate-800 disabled:opacity-50"
+                  className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg bg-[#2563EB] px-4 py-2 text-xs font-semibold text-white hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 disabled:opacity-50"
                 >
-                  <Sparkles className="h-3.5 w-3.5" />
-                  {saving ? "Re-Grading..." : `Save Edit & Re-Grade ${activeQuestionNo}`}
+                  <Sparkles className="h-4 w-4" aria-hidden="true" />
+                  <span>{saving ? "Re-Grading..." : `Save Edit & Re-Grade ${activeQuestionNo}`}</span>
                 </button>
               </>
             ) : (
               <>
-                <label className="text-xs font-semibold text-slate-700">
+                <label className="text-xs font-semibold text-[#334155]">
                   Edit Full Pen-to-Print Markdown
                 </label>
                 <textarea
                   value={draftMarkdown}
                   onChange={(e) => setDraftMarkdown(e.target.value)}
-                  className="min-h-[320px] flex-1 rounded-lg border border-slate-300 p-3 font-mono text-xs leading-relaxed text-slate-900 focus:border-blue-500 focus:outline-none"
+                  className="min-h-[280px] flex-1 rounded-lg border border-slate-300 p-3 font-mono text-xs leading-relaxed text-[#0F172A] focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/20"
                 />
                 <button
                   type="button"
                   disabled={saving}
                   onClick={handleSaveMarkdown}
-                  className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-slate-900 px-3 py-2 text-xs font-semibold text-white hover:bg-slate-800 disabled:opacity-50"
+                  className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg bg-[#2563EB] px-4 py-2 text-xs font-semibold text-white hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 disabled:opacity-50"
                 >
-                  <Save className="h-3.5 w-3.5" />
-                  {saving ? "Saving..." : "Save Markdown & Regenerate PDF"}
+                  <Save className="h-4 w-4" aria-hidden="true" />
+                  <span>{saving ? "Saving..." : "Save Markdown & Regenerate PDF"}</span>
                 </button>
               </>
             )}

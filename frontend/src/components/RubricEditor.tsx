@@ -127,51 +127,71 @@ export function RubricEditor({ onSaved }: RubricEditorProps) {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5 sm:space-y-6">
       <form
         onSubmit={handleDraftFromFiles}
-        className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm"
+        className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6"
       >
-        <h2 className="text-base font-bold text-slate-900">
+        <h2 className="text-base font-bold text-[#0F172A]">
           1. Upload Question Paper &amp; Model Answer (Optional AI Draft)
         </h2>
         <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
           <div>
-            <label className="block text-xs font-semibold text-slate-600">Subject Code</label>
+            <label
+              htmlFor="rubric-subject"
+              className="block text-xs font-semibold text-[#475569]"
+            >
+              Subject Code
+            </label>
             <input
+              id="rubric-subject"
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+              className="mt-1.5 min-h-[44px] w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-[#0F172A] focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/20"
               placeholder="e.g. datascience"
             />
           </div>
           <div>
-            <label className="block text-xs font-semibold text-slate-600">Exam Title</label>
+            <label
+              htmlFor="rubric-title"
+              className="block text-xs font-semibold text-[#475569]"
+            >
+              Exam Title
+            </label>
             <input
+              id="rubric-title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+              className="mt-1.5 min-h-[44px] w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-[#0F172A] focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/20"
               placeholder="e.g. Midterm Data Science"
             />
           </div>
           <div>
-            <label className="block text-xs font-semibold text-slate-600">
+            <label
+              htmlFor="rubric-qp"
+              className="block text-xs font-semibold text-[#475569]"
+            >
               Question Paper (PDF/TXT/Image)
             </label>
             <input
+              id="rubric-qp"
               type="file"
               onChange={(e) => setQpFile(e.target.files?.[0] || null)}
-              className="mt-1 w-full text-xs text-slate-700"
+              className="mt-1.5 min-h-[44px] w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-[#334155]"
             />
           </div>
           <div>
-            <label className="block text-xs font-semibold text-slate-600">
+            <label
+              htmlFor="rubric-ma"
+              className="block text-xs font-semibold text-[#475569]"
+            >
               Model Answer Script (PDF/TXT/Image)
             </label>
             <input
+              id="rubric-ma"
               type="file"
               onChange={(e) => setMaFile(e.target.files?.[0] || null)}
-              className="mt-1 w-full text-xs text-slate-700"
+              className="mt-1.5 min-h-[44px] w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-[#334155]"
             />
           </div>
         </div>
@@ -179,43 +199,43 @@ export function RubricEditor({ onSaved }: RubricEditorProps) {
           <button
             type="submit"
             disabled={loadingDraft || !qpFile || !maFile}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-4 py-2 text-xs font-semibold text-slate-800 hover:bg-slate-50 disabled:opacity-50"
+            className="inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-xs font-semibold text-[#1E293B] hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 disabled:opacity-50 sm:w-auto"
           >
-            <Sparkles className="h-4 w-4" />
-            {loadingDraft ? "Drafting Rubric..." : "Draft Rubric with AI"}
+            <Sparkles className="h-4 w-4" aria-hidden="true" />
+            <span>{loadingDraft ? "Drafting Rubric..." : "Draft Rubric with AI"}</span>
           </button>
         </div>
       </form>
 
       {/* Interactive Rubric Card Editor */}
-      <div className="space-y-4 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-        <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="space-y-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
+        <div className="flex flex-col justify-between gap-3 sm:flex-row sm:flex-wrap sm:items-center">
           <div>
-            <h2 className="text-base font-bold text-slate-900">
-              2. Interactive Rubric Editor ({rubric.exam_id})
+            <h2 className="text-base font-bold text-[#0F172A]">
+              2. Interactive Rubric Editor (<span className="font-mono">{rubric.exam_id}</span>)
             </h2>
-            <p className="text-xs text-slate-500">
-              Total Marks: {recomputeTotal(rubric.questions)} &middot; Status:{" "}
-              {rubric.is_locked ? "Locked" : "Draft"}
+            <p className="mt-0.5 text-xs text-[#475569]">
+              Total Marks: <span className="font-mono font-semibold">{recomputeTotal(rubric.questions)}</span>{" "}
+              &middot; Status: {rubric.is_locked ? "Locked" : "Draft"}
             </p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <button
               type="button"
               onClick={addQuestion}
-              className="inline-flex items-center gap-1 rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+              className="inline-flex min-h-[44px] flex-1 items-center justify-center gap-1.5 rounded-lg border border-slate-300 px-3.5 py-2 text-xs font-semibold text-[#1E293B] hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 sm:flex-none"
             >
-              <Plus className="h-3.5 w-3.5" />
-              Add Question
+              <Plus className="h-4 w-4" aria-hidden="true" />
+              <span>Add Question</span>
             </button>
             <button
               type="button"
               disabled={saving}
               onClick={() => handleSaveAndLock(true)}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-slate-900 px-4 py-1.5 text-xs font-semibold text-white hover:bg-slate-800 disabled:opacity-50"
+              className="inline-flex min-h-[44px] flex-1 items-center justify-center gap-1.5 rounded-lg bg-[#2563EB] px-4 py-2 text-xs font-semibold text-white hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 disabled:opacity-50 sm:flex-none"
             >
-              <Lock className="h-3.5 w-3.5" />
-              {saving ? "Locking..." : "Lock Exam Rubric"}
+              <Lock className="h-4 w-4" aria-hidden="true" />
+              <span>{saving ? "Locking..." : "Lock Exam Rubric"}</span>
             </button>
           </div>
         </div>
@@ -228,8 +248,8 @@ export function RubricEditor({ onSaved }: RubricEditorProps) {
 
         <div className="space-y-4">
           {rubric.questions.map((q, qi) => (
-            <div key={qi} className="rounded-lg border border-slate-200 bg-slate-50/60 p-4">
-              <div className="grid grid-cols-1 gap-3 md:grid-cols-12">
+            <div key={qi} className="rounded-lg border border-slate-200 bg-slate-50/70 p-3.5 sm:p-4">
+              <div className="grid grid-cols-1 gap-2.5 md:grid-cols-12">
                 <input
                   value={q.question_no}
                   onChange={(e) => {
@@ -237,7 +257,7 @@ export function RubricEditor({ onSaved }: RubricEditorProps) {
                     next[qi] = { ...q, question_no: e.target.value };
                     setRubric({ ...rubric, questions: next });
                   }}
-                  className="md:col-span-2 rounded border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-bold"
+                  className="min-h-[44px] rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-bold text-[#0F172A] md:col-span-2"
                   placeholder="Q1"
                 />
                 <input
@@ -247,7 +267,7 @@ export function RubricEditor({ onSaved }: RubricEditorProps) {
                     next[qi] = { ...q, question_text: e.target.value };
                     setRubric({ ...rubric, questions: next });
                   }}
-                  className="md:col-span-5 rounded border border-slate-300 bg-white px-2.5 py-1.5 text-xs"
+                  className="min-h-[44px] rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs text-[#0F172A] md:col-span-5"
                   placeholder="Question prompt"
                 />
                 <select
@@ -257,14 +277,14 @@ export function RubricEditor({ onSaved }: RubricEditorProps) {
                     next[qi] = { ...q, question_type: e.target.value as QuestionType };
                     setRubric({ ...rubric, questions: next });
                   }}
-                  className="md:col-span-3 rounded border border-slate-300 bg-white px-2 py-1.5 text-xs"
+                  className="min-h-[44px] rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-[#0F172A] md:col-span-3"
                 >
                   <option value="short_answer">short_answer</option>
                   <option value="long_answer">long_answer</option>
                   <option value="numerical">numerical</option>
                   <option value="diagram_heavy">diagram_heavy</option>
                 </select>
-                <div className="md:col-span-2 flex items-center gap-1.5">
+                <div className="flex items-center gap-2 md:col-span-2">
                   <input
                     type="number"
                     step="0.5"
@@ -278,10 +298,11 @@ export function RubricEditor({ onSaved }: RubricEditorProps) {
                         total_marks: recomputeTotal(next),
                       });
                     }}
-                    className="w-full rounded border border-slate-300 bg-white px-2 py-1.5 text-xs font-mono"
+                    className="min-h-[44px] w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 font-mono text-xs text-[#0F172A]"
                   />
                   <button
                     type="button"
+                    aria-label="Remove question"
                     onClick={() => {
                       const next = rubric.questions.filter((_, idx) => idx !== qi);
                       setRubric({
@@ -290,20 +311,19 @@ export function RubricEditor({ onSaved }: RubricEditorProps) {
                         total_marks: recomputeTotal(next),
                       });
                     }}
-                    className="rounded p-1 text-slate-400 hover:text-red-600"
-                    title="Remove Question"
+                    className="inline-flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 hover:bg-red-50 hover:text-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
                   >
-                    <Trash2 className="h-4 w-4" />
+                    <Trash2 className="h-4 w-4" aria-hidden="true" />
                   </button>
                 </div>
               </div>
 
               {/* Criteria */}
-              <div className="mt-3 space-y-2 pl-2">
+              <div className="mt-3 space-y-2 sm:pl-2">
                 {q.criteria.map((c, ci) => (
                   <div
                     key={c.criterion_id}
-                    className="grid grid-cols-1 gap-2 rounded border border-slate-200 bg-white p-2.5 md:grid-cols-12"
+                    className="grid grid-cols-1 gap-2 rounded-lg border border-slate-200 bg-white p-3 md:grid-cols-12"
                   >
                     <input
                       value={c.description}
@@ -314,7 +334,7 @@ export function RubricEditor({ onSaved }: RubricEditorProps) {
                         next[qi] = { ...q, criteria: crit };
                         setRubric({ ...rubric, questions: next });
                       }}
-                      className="md:col-span-5 rounded border border-slate-200 px-2 py-1 text-xs"
+                      className="min-h-[40px] rounded-md border border-slate-200 px-2.5 py-1 text-xs text-[#0F172A] md:col-span-5"
                       placeholder="Criterion description"
                     />
                     <input
@@ -332,7 +352,7 @@ export function RubricEditor({ onSaved }: RubricEditorProps) {
                         next[qi] = { ...q, criteria: crit };
                         setRubric({ ...rubric, questions: next });
                       }}
-                      className="md:col-span-4 rounded border border-slate-200 px-2 py-1 text-xs"
+                      className="min-h-[40px] rounded-md border border-slate-200 px-2.5 py-1 text-xs text-[#0F172A] md:col-span-4"
                       placeholder="Keywords (comma separated)"
                     />
                     <input
@@ -346,9 +366,9 @@ export function RubricEditor({ onSaved }: RubricEditorProps) {
                         next[qi] = { ...q, criteria: crit };
                         setRubric({ ...rubric, questions: next });
                       }}
-                      className="md:col-span-1 rounded border border-slate-200 px-2 py-1 text-xs font-mono"
+                      className="min-h-[40px] rounded-md border border-slate-200 px-2.5 py-1 font-mono text-xs text-[#0F172A] md:col-span-1"
                     />
-                    <label className="md:col-span-2 flex items-center gap-1 text-[11px] text-slate-600">
+                    <label className="flex min-h-[40px] cursor-pointer items-center gap-2 text-xs text-[#475569] md:col-span-2">
                       <input
                         type="checkbox"
                         checked={c.requires_diagram}
@@ -359,8 +379,9 @@ export function RubricEditor({ onSaved }: RubricEditorProps) {
                           next[qi] = { ...q, criteria: crit };
                           setRubric({ ...rubric, questions: next });
                         }}
+                        className="h-4 w-4 rounded border-slate-300"
                       />
-                      Diagram
+                      <span>Diagram</span>
                     </label>
                   </div>
                 ))}

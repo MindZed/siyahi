@@ -67,17 +67,17 @@ export function EvaluationPanel({
     return (
       <div className="flex h-full flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
         <div className="border-b border-slate-200 bg-slate-50 px-4 py-3">
-          <h2 className="text-sm font-bold text-slate-900">
+          <h2 className="text-sm font-bold text-[#0F172A]">
             Pen-to-Print Sections &amp; Regions
           </h2>
-          <p className="text-xs text-slate-500">
+          <p className="mt-0.5 text-xs text-[#475569]">
             Standalone transcription mode (AI Grader disabled for this script).
           </p>
         </div>
 
-        <div className="flex-1 space-y-3 overflow-auto p-4">
+        <div className="flex-1 space-y-2.5 overflow-auto p-3.5 sm:p-4">
           {keys.length === 0 ? (
-            <div className="rounded-lg border border-dashed border-slate-200 p-4 text-xs text-slate-500">
+            <div className="rounded-lg border border-dashed border-slate-200 p-4 text-xs text-[#475569]">
               No segmented regions yet.
             </div>
           ) : (
@@ -89,17 +89,17 @@ export function EvaluationPanel({
                   key={qNo}
                   type="button"
                   onClick={() => onSelectQuestion(qNo)}
-                  className={`w-full rounded-lg border p-3 text-left transition ${
+                  className={`min-h-[44px] w-full rounded-lg border p-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 ${
                     selected
-                      ? "border-slate-900 bg-slate-900 text-white"
-                      : "border-slate-200 bg-white text-slate-800 hover:bg-slate-50"
+                      ? "border-[#1E293B] bg-[#1E293B] text-white"
+                      : "border-slate-200 bg-white text-[#0F172A] hover:bg-slate-50"
                   }`}
                 >
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between gap-2">
                     <span className="text-sm font-bold">{qNo}</span>
                     <span
-                      className={`rounded px-1.5 py-0.5 text-[11px] ${
-                        selected ? "bg-slate-700 text-slate-100" : "bg-slate-100 text-slate-600"
+                      className={`rounded px-2 py-0.5 text-[11px] font-semibold ${
+                        selected ? "bg-slate-700 text-slate-100" : "bg-slate-100 text-[#475569]"
                       }`}
                     >
                       {refs.length} regions
@@ -118,26 +118,26 @@ export function EvaluationPanel({
     <div className="flex h-full flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
       {/* Score Summary Header */}
       <div className="border-b border-slate-200 bg-slate-50 px-4 py-3">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-2">
           <div>
-            <div className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+            <div className="text-xs font-semibold uppercase tracking-wider text-[#475569]">
               Total Score
             </div>
-            <div className="text-xl font-bold text-slate-900">
+            <div className="font-mono text-xl font-bold text-[#0F172A]">
               {evaluation.total_final_marks} / {evaluation.total_max_marks}
             </div>
           </div>
           <a
             href={api.exportCsvUrl(evaluation.exam_id)}
-            className="inline-flex items-center gap-1 rounded border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100"
+            className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-[#1E293B] hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 sm:min-h-[36px]"
           >
-            <Download className="h-3.5 w-3.5" />
-            CSV
+            <Download className="h-3.5 w-3.5" aria-hidden="true" />
+            <span>CSV</span>
           </a>
         </div>
 
         {/* Question Selector Tabs */}
-        <div className="mt-3 flex flex-wrap gap-1.5">
+        <div className="mt-3 flex flex-wrap gap-2">
           {evaluation.questions.map((q) => {
             const isActive = q.question_no === activeQuestionNo;
             return (
@@ -145,16 +145,20 @@ export function EvaluationPanel({
                 key={q.question_no}
                 type="button"
                 onClick={() => onSelectQuestion(q.question_no)}
-                className={`inline-flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-semibold ${
+                className={`inline-flex min-h-[44px] items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 sm:min-h-[36px] ${
                   isActive
-                    ? "bg-slate-900 text-white"
+                    ? "bg-[#1E293B] text-white"
                     : q.needs_human_review
                     ? "border border-amber-300 bg-amber-50 text-amber-900"
-                    : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-100"
+                    : "border border-slate-200 bg-white text-[#334155] hover:bg-slate-100"
                 }`}
               >
-                {q.question_no}: {q.final_marks}/{q.max_marks}
-                {q.needs_human_review && <AlertTriangle className="h-3 w-3 text-amber-600" />}
+                <span>
+                  {q.question_no}: {q.final_marks}/{q.max_marks}
+                </span>
+                {q.needs_human_review && (
+                  <AlertTriangle className="h-3.5 w-3.5 text-amber-600" aria-hidden="true" />
+                )}
               </button>
             );
           })}
@@ -162,16 +166,16 @@ export function EvaluationPanel({
       </div>
 
       {/* Active Question Criteria & Override */}
-      <div className="flex-1 space-y-4 overflow-auto p-4">
+      <div className="flex-1 space-y-4 overflow-auto p-3.5 sm:p-4">
         {activeQ && (
           <>
             {activeQ.needs_human_review && (
               <div className="rounded-lg border border-amber-300 bg-amber-50 p-3 text-xs text-amber-950">
                 <div className="flex items-center gap-1.5 font-bold">
-                  <ShieldAlert className="h-4 w-4 text-amber-700" />
-                  NEEDS HUMAN REVIEW (Spread Δŷ = {activeQ.mark_spread_delta})
+                  <ShieldAlert className="h-4 w-4 text-amber-700" aria-hidden="true" />
+                  <span>NEEDS HUMAN REVIEW (Spread Δŷ = {activeQ.mark_spread_delta})</span>
                 </div>
-                <ul className="mt-1 list-disc space-y-0.5 pl-4">
+                <ul className="mt-1.5 list-disc space-y-0.5 pl-4">
                   {activeQ.review_reasons.map((reason, idx) => (
                     <li key={idx}>{reason}</li>
                   ))}
@@ -180,7 +184,7 @@ export function EvaluationPanel({
             )}
 
             <div className="space-y-2.5">
-              <div className="text-xs font-bold uppercase tracking-wider text-slate-500">
+              <div className="text-xs font-bold uppercase tracking-wider text-[#475569]">
                 Criterion Audit Breakdown
               </div>
               {activeQ.criteria_breakdown.map((crit) => (
@@ -188,14 +192,14 @@ export function EvaluationPanel({
                   key={crit.criterion_id}
                   className="rounded-lg border border-slate-200 bg-slate-50/70 p-3 text-xs"
                 >
-                  <div className="flex items-center justify-between font-bold text-slate-900">
+                  <div className="flex items-center justify-between font-bold text-[#0F172A]">
                     <span>{crit.criterion_id}</span>
-                    <span>
+                    <span className="font-mono">
                       {crit.awarded_points} / {crit.max_points}
                     </span>
                   </div>
                   {crit.student_quote && (
-                    <div className="mt-1.5 rounded border border-slate-200 bg-white px-2 py-1 font-mono text-[11px] text-slate-700">
+                    <div className="mt-1.5 rounded border border-slate-200 bg-white px-2.5 py-1.5 font-mono text-[11px] text-[#334155]">
                       &ldquo;{crit.student_quote}&rdquo;{" "}
                       <span
                         className={`ml-1 inline-flex items-center gap-0.5 font-sans font-semibold ${
@@ -204,7 +208,7 @@ export function EvaluationPanel({
                       >
                         {crit.quote_verified ? (
                           <>
-                            <CheckCircle2 className="h-3 w-3" /> Verified
+                            <CheckCircle2 className="h-3 w-3" aria-hidden="true" /> Verified
                           </>
                         ) : (
                           "Unverified Quote"
@@ -212,7 +216,7 @@ export function EvaluationPanel({
                       </span>
                     </div>
                   )}
-                  <p className="mt-1.5 text-slate-600">{crit.reason}</p>
+                  <p className="mt-1.5 leading-relaxed text-[#475569]">{crit.reason}</p>
                 </div>
               ))}
             </div>
@@ -220,9 +224,9 @@ export function EvaluationPanel({
             {/* 1-Click Teacher Override */}
             <form
               onSubmit={handleOverride}
-              className="space-y-2.5 rounded-lg border border-slate-200 bg-slate-50 p-3"
+              className="space-y-2.5 rounded-lg border border-slate-200 bg-slate-50 p-3.5"
             >
-              <div className="text-xs font-bold text-slate-800">
+              <div className="text-xs font-bold text-[#0F172A]">
                 Professor Confirm / Override ({activeQ.question_no})
               </div>
               <div className="flex items-center gap-2">
@@ -233,20 +237,20 @@ export function EvaluationPanel({
                   max={activeQ.max_marks}
                   value={overrideMarks}
                   onChange={(e) => setOverrideMarks(e.target.value)}
-                  className="w-24 rounded border border-slate-300 bg-white px-2.5 py-1.5 text-sm font-bold"
+                  className="min-h-[44px] w-24 rounded-lg border border-slate-300 bg-white px-3 py-1.5 font-mono text-sm font-bold text-[#0F172A] focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/20"
                 />
-                <span className="text-xs text-slate-500">/ {activeQ.max_marks}</span>
+                <span className="text-xs font-medium text-[#475569]">/ {activeQ.max_marks}</span>
               </div>
               <input
                 value={overrideNote}
                 onChange={(e) => setOverrideNote(e.target.value)}
                 placeholder="Optional override rationale..."
-                className="w-full rounded border border-slate-300 bg-white px-2.5 py-1.5 text-xs"
+                className="min-h-[44px] w-full rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs text-[#0F172A] focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/20"
               />
               <button
                 type="submit"
                 disabled={saving}
-                className="w-full rounded-lg bg-slate-900 px-3 py-2 text-xs font-semibold text-white hover:bg-slate-800 disabled:opacity-50"
+                className="min-h-[44px] w-full rounded-lg bg-[#2563EB] px-3 py-2 text-xs font-semibold text-white hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 disabled:opacity-50"
               >
                 {saving ? "Saving..." : "Confirm / Override Mark"}
               </button>
@@ -256,15 +260,18 @@ export function EvaluationPanel({
 
         {overrides.length > 0 && (
           <div className="space-y-1.5 border-t border-slate-200 pt-3">
-            <div className="flex items-center gap-1 text-xs font-bold text-slate-500">
-              <History className="h-3.5 w-3.5" />
-              Audit Override Log
+            <div className="flex items-center gap-1.5 text-xs font-bold text-[#475569]">
+              <History className="h-3.5 w-3.5" aria-hidden="true" />
+              <span>Audit Override Log</span>
             </div>
             {overrides.map((ovr) => (
-              <div key={ovr.override_id} className="rounded border border-slate-200 p-2 text-[11px]">
+              <div
+                key={ovr.override_id}
+                className="rounded-lg border border-slate-200 p-2.5 text-[11px]"
+              >
                 <strong>{ovr.question_no}</strong>: {ovr.previous_marks} &rarr;{" "}
                 <strong>{ovr.new_marks}</strong>
-                {ovr.teacher_note && <div className="text-slate-600">{ovr.teacher_note}</div>}
+                {ovr.teacher_note && <div className="mt-0.5 text-[#475569]">{ovr.teacher_note}</div>}
               </div>
             ))}
           </div>

@@ -3,12 +3,14 @@
 import { useCallback, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft, ClipboardCheck, FileText, Loader2, ScanEye } from "lucide-react";
 import { EvaluationPanel } from "@/components/EvaluationPanel";
 import { ScanViewer } from "@/components/ScanViewer";
 import { TranscriptEditor } from "@/components/TranscriptEditor";
 import { api } from "@/lib/api";
 import type { SubmissionDetailResponse } from "@/types/schemas";
+
+type MobilePane = "scan" | "transcript" | "evaluation";
 
 export default function ReviewDeskPage() {
   const params = useParams<{ submissionId: string }>();
@@ -17,6 +19,7 @@ export default function ReviewDeskPage() {
   const [detail, setDetail] = useState<SubmissionDetailResponse | null>(null);
   const [activeQuestionNo, setActiveQuestionNo] = useState<string | null>(null);
   const [selectedRegionId, setSelectedRegionId] = useState<string | null>(null);
+  const [mobilePane, setMobilePane] = useState<MobilePane>("scan");
   const [error, setError] = useState<string | null>(null);
 
   const loadDetail = useCallback(async () => {
@@ -47,7 +50,10 @@ export default function ReviewDeskPage() {
 
   if (error) {
     return (
-      <div className="rounded-xl border border-red-200 bg-red-50 p-6 text-sm text-red-800">
+      <div
+        role="alert"
+        className="rounded-xl border border-red-200 bg-red-50 p-5 text-sm font-medium text-red-800"
+      >
         {error}
       </div>
     );
@@ -55,9 +61,9 @@ export default function ReviewDeskPage() {
 
   if (!detail) {
     return (
-      <div className="flex h-64 items-center justify-center gap-2 text-sm text-slate-600">
-        <Loader2 className="h-5 w-5 animate-spin" />
-        Loading 3-Pane Pen-to-Print Review Desk...
+      <div className="flex h-64 items-center justify-center gap-2 text-sm text-[#475569]">
+        <Loader2 className="h-5 w-5 animate-spin text-[#2563EB]" aria-hidden="true" />
+        <span>Loading Pen-to-Print Review Desk...</span>
       </div>
     );
   }
@@ -69,40 +75,79 @@ export default function ReviewDeskPage() {
     (q) => q.question_no === activeQuestionNo
   );
 
+  const mobileTabs: { id: MobilePane; label: string; icon: typeof ScanEye }[] = [
+    { id: "scan", label: "Scan", icon: ScanEye },
+    { id: "transcript", label: "Transcript", icon: FileText },
+    { id: "evaluation", label: detail.evaluation ? "Grade" : "Sections", icon: ClipboardCheck },
+  ];
+
   return (
-    <div className="space-y-4">
+    <div className="space-y-3 sm:space-y-4">
       {/* Top Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
-        <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white p-3 shadow-sm sm:px-4">
+        <div className="flex min-w-0 items-center gap-3">
           <Link
             href="/upload"
-            className="inline-flex items-center gap-1 rounded border border-slate-200 px-2.5 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+            className="inline-flex min-h-[44px] shrink-0 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-[#1E293B] transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
           >
-            <ArrowLeft className="h-3.5 w-3.5" />
-            Queue
+            <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+            <span>Queue</span>
           </Link>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="text-base font-bold text-slate-900">
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+              <span className="truncate text-sm font-bold text-[#0F172A] sm:text-base">
                 {detail.submission.roll_number}
               </span>
-              <span className="rounded bg-slate-100 px-2 py-0.5 font-mono text-xs text-slate-600">
+              <span className="rounded bg-slate-100 px-2 py-0.5 font-mono text-[11px] text-[#475569]">
                 {detail.submission.submission_id}
               </span>
-              <span className="rounded bg-blue-50 px-2 py-0.5 text-xs font-semibold text-blue-700">
+              <span className="rounded bg-blue-50 px-2 py-0.5 text-[11px] font-semibold text-[#2563EB]">
                 {detail.submission.status}
               </span>
             </div>
-            <div className="text-xs text-slate-500">
-              {detail.submission.original_filename} &middot; Engine: {detail.submission.engine_used}
+            <div className="mt-0.5 truncate text-xs text-[#475569]">
+              {detail.submission.original_filename} &middot; Engine:{" "}
+              {detail.submission.engine_used}
             </div>
           </div>
         </div>
       </div>
 
-      {/* 3-Pane Pen-to-Print Split Workspace (40% / 30% / 30%) */}
-      <div className="grid h-[calc(100vh-190px)] min-h-[620px] grid-cols-1 gap-4 lg:grid-cols-10">
-        <div className="h-full min-h-[420px] lg:col-span-4">
+      {/* Mobile Segmented Pane Switcher (< lg) */}
+      <div
+        role="tablist"
+        aria-label="Review desk views"
+        className="grid grid-cols-3 gap-1.5 rounded-xl border border-slate-200 bg-white p-1.5 shadow-sm lg:hidden"
+      >
+        {mobileTabs.map(({ id, label, icon: Icon }) => {
+          const active = mobilePane === id;
+          return (
+            <button
+              key={id}
+              type="button"
+              role="tab"
+              aria-selected={active}
+              onClick={() => setMobilePane(id)}
+              className={`inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-lg px-2 py-2 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 ${
+                active
+                  ? "bg-[#1E293B] text-white shadow-sm"
+                  : "text-[#475569] hover:bg-slate-100 hover:text-[#0F172A]"
+              }`}
+            >
+              <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
+              <span>{label}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* 3-Pane Pen-to-Print Split Workspace (Tabbed on Mobile, 40/30/30 Split on Desktop) */}
+      <div className="grid grid-cols-1 gap-4 lg:h-[calc(100vh-195px)] lg:min-h-[620px] lg:grid-cols-10">
+        <div
+          className={`${
+            mobilePane === "scan" ? "block" : "hidden"
+          } h-[68vh] min-h-[420px] lg:col-span-4 lg:block lg:h-full`}
+        >
           <ScanViewer
             pageImageUrls={detail.page_image_urls}
             ocr={detail.ocr}
@@ -112,7 +157,11 @@ export default function ReviewDeskPage() {
           />
         </div>
 
-        <div className="h-full min-h-[420px] lg:col-span-3">
+        <div
+          className={`${
+            mobilePane === "transcript" ? "block" : "hidden"
+          } h-[68vh] min-h-[420px] lg:col-span-3 lg:block lg:h-full`}
+        >
           <TranscriptEditor
             submissionId={detail.submission.submission_id}
             cleanMarkdown={detail.clean_markdown}
@@ -126,7 +175,11 @@ export default function ReviewDeskPage() {
           />
         </div>
 
-        <div className="h-full min-h-[420px] lg:col-span-3">
+        <div
+          className={`${
+            mobilePane === "evaluation" ? "block" : "hidden"
+          } h-[68vh] min-h-[420px] lg:col-span-3 lg:block lg:h-full`}
+        >
           <EvaluationPanel
             submissionId={detail.submission.submission_id}
             evaluation={detail.evaluation}
