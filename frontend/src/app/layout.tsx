@@ -39,9 +39,9 @@ export default function RootLayout({
       lang="en"
       className={`${plusJakartaSans.variable} ${jetBrainsMono.variable}`}
     >
-      <body className="min-h-screen bg-[#F8FAFC] font-sans text-[#0F172A] antialiased">
+      <body className="min-h-screen overflow-x-hidden bg-[#F8FAFC] font-sans text-[#0F172A] antialiased">
         <NavBar />
-        <main className="mx-auto max-w-[1600px] px-3 pb-24 pt-4 sm:px-6 sm:pt-6 md:pb-8">
+        <main className="mx-auto w-full max-w-[1600px] overflow-x-hidden px-3 pb-24 pt-4 sm:px-6 sm:pt-6 md:pb-8">
           {children}
         </main>
       </body>

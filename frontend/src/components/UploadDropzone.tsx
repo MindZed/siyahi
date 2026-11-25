@@ -273,26 +273,26 @@ export function UploadDropzone() {
         {/* Mobile Card View (< md) */}
         <div className="divide-y divide-slate-100 md:hidden">
           {submissions.map((sub) => (
-            <div key={sub.submission_id} className="space-y-3 p-4">
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
+            <div key={sub.submission_id} className="min-w-0 space-y-2.5 p-3.5">
+              <div className="flex flex-wrap items-start justify-between gap-2">
+                <div className="min-w-0 flex-1">
                   <div className="truncate text-sm font-bold text-[#0F172A]">{sub.roll_number}</div>
                   <div className="mt-0.5 truncate text-xs text-[#475569]">
                     {sub.original_filename} &middot;{" "}
                     <span className="font-mono">{sub.submission_id}</span>
                   </div>
                 </div>
-                {renderStatusBadge(sub.status)}
+                <div className="shrink-0">{renderStatusBadge(sub.status)}</div>
               </div>
 
-              <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
+              <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-xs">
                 <span className="font-mono font-medium text-[#334155]">
                   {sub.total_final_marks !== null && sub.total_final_marks !== undefined
                     ? `Score: ${sub.total_final_marks} (AI: ${sub.total_ai_marks})`
                     : "OCR Only"}
                 </span>
                 {sub.wall_time_sec !== null && sub.wall_time_sec !== undefined && (
-                  <span className="font-mono text-[11px] text-[#475569]">
+                  <span className="break-all font-mono text-[11px] text-[#475569]">
                     {sub.wall_time_sec.toFixed(1)}s ({sub.ocr_time_sec?.toFixed(1) ?? "?"}s GPU)
                     {sub.estimated_cost_usd !== null && sub.estimated_cost_usd !== undefined
                       ? ` · $${sub.estimated_cost_usd.toFixed(4)}`
@@ -310,22 +310,22 @@ export function UploadDropzone() {
               <div className="grid grid-cols-3 gap-2 pt-1">
                 <a
                   href={api.exportMdUrl(sub.submission_id, "clean")}
-                  className="inline-flex min-h-[44px] items-center justify-center rounded-lg border border-slate-200 bg-white px-2 text-xs font-semibold text-[#1E293B] hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
+                  className="inline-flex min-h-[44px] min-w-0 items-center justify-center rounded-lg border border-slate-200 bg-white px-2 text-xs font-semibold text-[#1E293B] hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
                 >
                   .MD
                 </a>
                 <a
                   href={api.exportPdfUrl(sub.submission_id)}
-                  className="inline-flex min-h-[44px] items-center justify-center rounded-lg border border-slate-200 bg-white px-2 text-xs font-semibold text-[#1E293B] hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
+                  className="inline-flex min-h-[44px] min-w-0 items-center justify-center rounded-lg border border-slate-200 bg-white px-2 text-xs font-semibold text-[#1E293B] hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
                 >
                   .PDF
                 </a>
                 <Link
                   href={`/review/${sub.submission_id}`}
-                  className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-lg bg-[#1E293B] px-2.5 text-xs font-semibold text-white hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
+                  className="inline-flex min-h-[44px] min-w-0 items-center justify-center gap-1 rounded-lg bg-[#1E293B] px-2 text-xs font-semibold text-white hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
                 >
-                  <FileText className="h-3.5 w-3.5" aria-hidden="true" />
-                  <span>Review</span>
+                  <FileText className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                  <span className="truncate">Review</span>
                 </Link>
               </div>
             </div>
