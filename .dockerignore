@@ -1,0 +1,11 @@
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.git/
+data/
+.env
+frontend/node_modules/
+frontend/.next/
+SYSTEM_BRIEF_AND_FLOWCHART.pdf
