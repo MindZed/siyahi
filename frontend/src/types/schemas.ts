@@ -140,6 +140,10 @@ export interface SubmissionSummary {
   original_filename: string;
   status: string;
   engine_used: string;
+  page_count?: number;
+  ocr_time_sec?: number | null;
+  wall_time_sec?: number | null;
+  estimated_cost_usd?: number | null;
   total_ai_marks?: number | null;
   total_final_marks?: number | null;
   needs_review_count: number;
@@ -158,10 +162,25 @@ export interface SubmissionDetailResponse {
   overrides: AuditOverrideRecord[];
 }
 
+export interface ModalUsageSummary {
+  total_submissions: number;
+  total_pages: number;
+  total_ocr_time_sec: number;
+  avg_ocr_time_sec: number;
+  siyahi_gpu_cost_usd: number;
+  modal_baseline_spent_usd: number;
+  modal_total_bill_usd: number;
+  modal_credit_limit_usd: number;
+  modal_bill_percent: number;
+  gpu_name: string;
+  gpu_rate_per_hr: number;
+}
+
 export interface HealthStatus {
   status: string;
   mock_modal: boolean;
   grader_provider: string;
   grader_model: string;
   mock_gemini: boolean;
+  usage?: ModalUsageSummary;
 }

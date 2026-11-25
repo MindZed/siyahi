@@ -291,6 +291,14 @@ export function UploadDropzone() {
                     ? `Score: ${sub.total_final_marks} (AI: ${sub.total_ai_marks})`
                     : "OCR Only"}
                 </span>
+                {sub.wall_time_sec !== null && sub.wall_time_sec !== undefined && (
+                  <span className="font-mono text-[11px] text-[#475569]">
+                    {sub.wall_time_sec.toFixed(1)}s ({sub.ocr_time_sec?.toFixed(1) ?? "?"}s GPU)
+                    {sub.estimated_cost_usd !== null && sub.estimated_cost_usd !== undefined
+                      ? ` · $${sub.estimated_cost_usd.toFixed(4)}`
+                      : ""}
+                  </span>
+                )}
                 {sub.needs_review_count > 0 && (
                   <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-0.5 font-semibold text-amber-800">
                     <AlertTriangle className="h-3 w-3" aria-hidden="true" />
@@ -336,6 +344,7 @@ export function UploadDropzone() {
               <tr>
                 <th className="px-4 py-3">Roll No / File</th>
                 <th className="px-4 py-3">Pipeline Status</th>
+                <th className="px-4 py-3">Time &amp; Cost</th>
                 <th className="px-4 py-3">Score</th>
                 <th className="px-4 py-3">Review Flags</th>
                 <th className="px-4 py-3 text-right">Actions</th>
@@ -352,6 +361,21 @@ export function UploadDropzone() {
                     </div>
                   </td>
                   <td className="px-4 py-3">{renderStatusBadge(sub.status)}</td>
+                  <td className="px-4 py-3 font-mono text-xs text-[#334155]">
+                    {sub.wall_time_sec !== null && sub.wall_time_sec !== undefined ? (
+                      <div>
+                        <div>{sub.wall_time_sec.toFixed(2)}s total</div>
+                        <div className="text-[11px] text-[#475569]">
+                          {sub.ocr_time_sec?.toFixed(2) ?? "?"}s GPU
+                          {sub.estimated_cost_usd !== null && sub.estimated_cost_usd !== undefined
+                            ? ` · $${sub.estimated_cost_usd.toFixed(4)}`
+                            : ""}
+                        </div>
+                      </div>
+                    ) : (
+                      <span className="text-slate-400">—</span>
+                    )}
+                  </td>
                   <td className="px-4 py-3 font-mono text-xs text-[#334155]">
                     {sub.total_final_marks !== null && sub.total_final_marks !== undefined
                       ? `${sub.total_final_marks} (AI: ${sub.total_ai_marks})`
@@ -394,7 +418,7 @@ export function UploadDropzone() {
               ))}
               {submissions.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="px-4 py-8 text-center text-sm text-[#475569]">
+                  <td colSpan={6} className="px-4 py-8 text-center text-sm text-[#475569]">
                     No submissions in queue yet.
                   </td>
                 </tr>

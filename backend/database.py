@@ -97,6 +97,20 @@ class Database:
                 );
                 """
             )
+            # Idempotent schema migrations for performance & cost tracking
+            existing_cols = {
+                row["name"]
+                for row in conn.execute("PRAGMA table_info(submissions)").fetchall()
+            }
+            migrations = [
+                ("page_count", "INTEGER NOT NULL DEFAULT 0"),
+                ("ocr_time_sec", "REAL NULL"),
+                ("wall_time_sec", "REAL NULL"),
+                ("estimated_cost_usd", "REAL NULL"),
+            ]
+            for col_name, col_def in migrations:
+                if col_name not in existing_cols:
+                    conn.execute(f"ALTER TABLE submissions ADD COLUMN {col_name} {col_def}")
 
     # ------------------------------------------------------------------
     # Exam CRUD
@@ -236,8 +250,12 @@ class Database:
         clean_markdown: str = "",
         annotated_markdown: str = "",
         status: str = "ocr_completed",
+        wall_time_sec: Optional[float] = None,
+        estimated_cost_usd: Optional[float] = None,
     ) -> None:
         now = _utc_now()
+        page_count = len(ocr.pages)
+        ocr_time_sec = ocr.processing_time_sec
         with self.connect() as conn:
             conn.execute(
                 """
@@ -247,6 +265,10 @@ class Database:
                     clean_markdown = ?,
                     annotated_markdown = ?,
                     status = ?,
+                    page_count = ?,
+                    ocr_time_sec = ?,
+                    wall_time_sec = COALESCE(?, wall_time_sec),
+                    estimated_cost_usd = COALESCE(?, estimated_cost_usd),
                     updated_at = ?
                 WHERE submission_id = ?
                 """,
@@ -256,6 +278,10 @@ class Database:
                     clean_markdown,
                     annotated_markdown,
                     status,
+                    page_count,
+                    ocr_time_sec,
+                    wall_time_sec,
+                    estimated_cost_usd,
                     now,
                     submission_id,
                 ),
@@ -301,23 +327,30 @@ class Database:
             return None
         return dict(row)
 
+    def _row_to_summary(self, r: sqlite3.Row | dict) -> SubmissionSummary:
+        return SubmissionSummary(
+            submission_id=r["submission_id"],
+            exam_id=r["exam_id"],
+            roll_number=r["roll_number"],
+            original_filename=r["original_filename"],
+            status=r["status"],
+            engine_used=r["engine_used"],
+            page_count=r["page_count"] or 0,
+            ocr_time_sec=r["ocr_time_sec"],
+            wall_time_sec=r["wall_time_sec"],
+            estimated_cost_usd=r["estimated_cost_usd"],
+            total_ai_marks=r["total_ai_marks"],
+            total_final_marks=r["total_final_marks"],
+            needs_review_count=r["needs_review_count"],
+            created_at=r["created_at"],
+            updated_at=r["updated_at"],
+        )
+
     def get_submission_summary(self, submission_id: str) -> Optional[SubmissionSummary]:
         row = self.get_submission_raw(submission_id)
         if not row:
             return None
-        return SubmissionSummary(
-            submission_id=row["submission_id"],
-            exam_id=row["exam_id"],
-            roll_number=row["roll_number"],
-            original_filename=row["original_filename"],
-            status=row["status"],
-            engine_used=row["engine_used"],
-            total_ai_marks=row["total_ai_marks"],
-            total_final_marks=row["total_final_marks"],
-            needs_review_count=row["needs_review_count"],
-            created_at=row["created_at"],
-            updated_at=row["updated_at"],
-        )
+        return self._row_to_summary(row)
 
     def list_submissions(self, exam_id: Optional[str] = None) -> list[SubmissionSummary]:
         with self.connect() as conn:
@@ -330,22 +363,30 @@ class Database:
                 rows = conn.execute(
                     "SELECT * FROM submissions ORDER BY created_at DESC"
                 ).fetchall()
-        return [
-            SubmissionSummary(
-                submission_id=r["submission_id"],
-                exam_id=r["exam_id"],
-                roll_number=r["roll_number"],
-                original_filename=r["original_filename"],
-                status=r["status"],
-                engine_used=r["engine_used"],
-                total_ai_marks=r["total_ai_marks"],
-                total_final_marks=r["total_final_marks"],
-                needs_review_count=r["needs_review_count"],
-                created_at=r["created_at"],
-                updated_at=r["updated_at"],
-            )
-            for r in rows
-        ]
+        return [self._row_to_summary(r) for r in rows]
+
+    def get_modal_usage_totals(self) -> dict:
+        """Return aggregated submission count, pages, OCR seconds, and tracked GPU USD."""
+        with self.connect() as conn:
+            row = conn.execute(
+                """
+                SELECT
+                    COUNT(*) AS total_submissions,
+                    COALESCE(SUM(page_count), 0) AS total_pages,
+                    COALESCE(SUM(ocr_time_sec), 0.0) AS total_ocr_time_sec,
+                    COALESCE(AVG(ocr_time_sec), 0.0) AS avg_ocr_time_sec,
+                    COALESCE(SUM(estimated_cost_usd), 0.0) AS siyahi_gpu_cost_usd
+                FROM submissions
+                WHERE ocr_time_sec IS NOT NULL
+                """
+            ).fetchone()
+        return {
+            "total_submissions": int(row["total_submissions"] or 0),
+            "total_pages": int(row["total_pages"] or 0),
+            "total_ocr_time_sec": round(float(row["total_ocr_time_sec"] or 0.0), 2),
+            "avg_ocr_time_sec": round(float(row["avg_ocr_time_sec"] or 0.0), 2),
+            "siyahi_gpu_cost_usd": round(float(row["siyahi_gpu_cost_usd"] or 0.0), 6),
+        }
 
     # ------------------------------------------------------------------
     # Audit Overrides & Grader Cache

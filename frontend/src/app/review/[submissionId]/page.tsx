@@ -108,6 +108,22 @@ export default function ReviewDeskPage() {
             <div className="mt-0.5 truncate text-xs text-[#475569]">
               {detail.submission.original_filename} &middot; Engine:{" "}
               {detail.submission.engine_used}
+              {detail.submission.wall_time_sec !== null &&
+                detail.submission.wall_time_sec !== undefined && (
+                  <>
+                    {" "}
+                    &middot;{" "}
+                    <span className="font-mono font-medium text-[#0F172A]">
+                      {detail.submission.wall_time_sec.toFixed(2)}s
+                    </span>{" "}
+                    ({detail.submission.ocr_time_sec?.toFixed(2) ?? "?"}s GPU
+                    {detail.submission.estimated_cost_usd !== null &&
+                    detail.submission.estimated_cost_usd !== undefined
+                      ? ` · $${detail.submission.estimated_cost_usd.toFixed(4)}`
+                      : ""}
+                    )
+                  </>
+                )}
             </div>
           </div>
         </div>

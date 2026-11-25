@@ -233,11 +233,31 @@ class SubmissionSummary(BaseModel):
     original_filename: str
     status: str
     engine_used: str
+    page_count: int = 0
+    ocr_time_sec: Optional[float] = None
+    wall_time_sec: Optional[float] = None
+    estimated_cost_usd: Optional[float] = None
     total_ai_marks: Optional[float] = None
     total_final_marks: Optional[float] = None
     needs_review_count: int = 0
     created_at: str
     updated_at: str
+
+
+class ModalUsageSummary(BaseModel):
+    """Aggregated performance & Modal GPU billing summary."""
+
+    total_submissions: int = 0
+    total_pages: int = 0
+    total_ocr_time_sec: float = 0.0
+    avg_ocr_time_sec: float = 0.0
+    siyahi_gpu_cost_usd: float = 0.0
+    modal_baseline_spent_usd: float = 0.0
+    modal_total_bill_usd: float = 0.0
+    modal_credit_limit_usd: float = 30.0
+    modal_bill_percent: float = 0.0
+    gpu_name: str = "L40S"
+    gpu_rate_per_hr: float = 1.95
 
 
 class SubmissionDetailResponse(BaseModel):

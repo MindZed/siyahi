@@ -33,6 +33,10 @@ class Settings(BaseSettings):
     modal_ocr_baseline_url: str = ""
     modal_api_key: str = ""
     mock_modal: bool = True
+    modal_gpu_name: str = "L40S"
+    modal_gpu_rate_per_hr: float = Field(default=1.95, ge=0.0)
+    modal_credit_limit_usd: float = Field(default=30.0, gt=0.0)
+    modal_baseline_spent_usd: float = Field(default=1.65, ge=0.0)
 
     # Variable AI Grader Provider (Phase 4)
     grader_provider: str = "gemini"

@@ -70,6 +70,9 @@ async def _run_submission_pipeline(
     enable_sensitivity_sampling: bool,
 ) -> None:
     """Background pipeline: local PII preprocess -> Modal OCR -> MD/PDF -> optional evaluation."""
+    import time
+
+    pipeline_t0 = time.perf_counter()
     try:
         db.update_submission_pages_and_status(submission_id, status="preprocessing")
         prep = await asyncio.to_thread(
@@ -117,12 +120,21 @@ async def _run_submission_pipeline(
             crops_dir=crops_dir,
         )
 
+        wall_time_sec = round(time.perf_counter() - pipeline_t0, 2)
+        estimated_cost_usd = (
+            0.0
+            if settings.mock_modal
+            else round(ocr_resp.processing_time_sec * (settings.modal_gpu_rate_per_hr / 3600.0), 6)
+        )
+
         db.save_ocr_result(
             submission_id=submission_id,
             ocr=ocr_resp,
             clean_markdown=clean_md,
             annotated_markdown=annotated_md,
             status="ocr_completed",
+            wall_time_sec=wall_time_sec,
+            estimated_cost_usd=estimated_cost_usd,
         )
 
         # If linked to a locked exam rubric, run Phase 4 evaluator if available
@@ -149,6 +161,24 @@ async def _run_submission_pipeline(
         db.update_submission_pages_and_status(submission_id, status=f"failed: {str(exc)[:180]}")
 
 
+def _build_usage_summary() -> dict:
+    totals = db.get_modal_usage_totals()
+    siyahi_cost = totals["siyahi_gpu_cost_usd"]
+    baseline = settings.modal_baseline_spent_usd
+    total_bill = round(baseline + siyahi_cost, 4)
+    limit = settings.modal_credit_limit_usd
+    pct = round(min(100.0, (total_bill / limit) * 100.0), 2) if limit > 0 else 0.0
+    return {
+        **totals,
+        "modal_baseline_spent_usd": baseline,
+        "modal_total_bill_usd": total_bill,
+        "modal_credit_limit_usd": limit,
+        "modal_bill_percent": pct,
+        "gpu_name": settings.modal_gpu_name,
+        "gpu_rate_per_hr": settings.modal_gpu_rate_per_hr,
+    }
+
+
 @app.get("/api/health")
 def health_check() -> dict:
     return {
@@ -157,7 +187,13 @@ def health_check() -> dict:
         "grader_provider": settings.grader_provider,
         "grader_model": settings.grader_model,
         "mock_gemini": settings.mock_gemini,
+        "usage": _build_usage_summary(),
     }
+
+
+@app.get("/api/usage")
+def get_modal_usage() -> dict:
+    return _build_usage_summary()
 
 
 # ---------------------------------------------------------------------------
